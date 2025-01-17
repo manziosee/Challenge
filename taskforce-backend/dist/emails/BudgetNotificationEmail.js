@@ -1,20 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+const jsx_runtime_1 = require("react/jsx-runtime");
 const components_1 = require("@react-email/components");
-const react_1 = __importDefault(require("react"));
 const BudgetNotificationEmail = ({ message }) => {
-    return (react_1.default.createElement(components_1.Html, null,
-        react_1.default.createElement(components_1.Head, null),
-        react_1.default.createElement(components_1.Preview, null, "Budget Exceeded Notification"),
-        react_1.default.createElement(components_1.Body, { style: main },
-            react_1.default.createElement(components_1.Container, { style: container },
-                react_1.default.createElement(components_1.Text, { style: company }, "TaskForce Wallet"),
-                react_1.default.createElement(components_1.Heading, { style: heading }, "Budget Exceeded Notification"),
-                react_1.default.createElement(components_1.Text, { style: messageStyle }, message),
-                react_1.default.createElement(components_1.Text, { style: paragraph }, "Please review your budget and adjust accordingly.")))));
+    return ((0, jsx_runtime_1.jsxs)(components_1.Html, { children: [(0, jsx_runtime_1.jsx)(components_1.Head, {}), (0, jsx_runtime_1.jsx)(components_1.Preview, { children: "Budget Exceeded Notification" }), (0, jsx_runtime_1.jsx)(components_1.Body, { style: main, children: (0, jsx_runtime_1.jsxs)(components_1.Container, { style: container, children: [(0, jsx_runtime_1.jsx)(components_1.Text, { style: company, children: "TaskForce Wallet" }), (0, jsx_runtime_1.jsx)(components_1.Heading, { style: heading, children: "Budget Exceeded Notification" }), (0, jsx_runtime_1.jsx)(components_1.Text, { style: messageStyle, children: message }), (0, jsx_runtime_1.jsx)(components_1.Text, { style: paragraph, children: "Please review your budget and adjust accordingly." })] }) })] }));
 };
 exports.default = BudgetNotificationEmail;
 const main = {
