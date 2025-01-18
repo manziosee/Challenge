@@ -1,11 +1,8 @@
-// src/middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { HttpError, ErrorHandler } from '../utils/http/error-handler';
 import logger from '../utils/logger';
-
-// In-memory token blacklist
-const revokedTokens = new Set<string>();
+import { isTokenRevoked } from '../controllers/authController';
 
 // Extend the Request type to include the `user` property
 declare module 'express-serve-static-core' {
@@ -16,16 +13,6 @@ declare module 'express-serve-static-core' {
     };
   }
 }
-
-// Middleware to check if a token is revoked
-export const isTokenRevoked = (req: Request, res: Response, next: NextFunction): void => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  if (token && revokedTokens.has(token)) {
-    ErrorHandler.handle(new HttpError(401, 'Token revoked', 'UnauthenticatedError'), res);
-    return;
-  }
-  next();
-};
 
 // Authentication middleware
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
@@ -45,13 +32,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
       next();
     } catch (error) {
       logger.error(`Invalid token: ${error}`);
-      return ErrorHandler.handle(new HttpError(401, 'Invalid token', 'UnauthenticatedError'), res);
+      ErrorHandler.handle(new HttpError(401, 'Invalid token', 'UnauthenticatedError'), res);
     }
   });
-};
-
-// Function to revoke a token (used in the logout controller)
-export const revokeToken = (token: string): void => {
-  revokedTokens.add(token);
-  logger.info(`Token revoked: ${token}`);
 };

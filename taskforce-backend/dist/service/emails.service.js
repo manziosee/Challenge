@@ -21,7 +21,7 @@ class EmailService {
         this.resend = new resend_1.Resend(api_key);
         this.email_from = from_email;
     }
-    sendEmail(data, Template) {
+    sendOTP(data, Template) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 return this.resend.emails.send({
@@ -33,6 +33,22 @@ class EmailService {
             }
             catch (error) {
                 logger_1.default.error("Error sending email with Resend:", error);
+                throw error;
+            }
+        });
+    }
+    sendBudgetNotification(email, message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.resend.emails.send({
+                    from: this.email_from,
+                    to: email,
+                    subject: 'Budget Exceeded Notification',
+                    html: `<p>${message}</p>`,
+                });
+            }
+            catch (error) {
+                logger_1.default.error("Error sending budget notification email:", error);
                 throw error;
             }
         });
