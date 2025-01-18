@@ -7,7 +7,6 @@ exports.setupSwagger = void 0;
 // src/swagger/swagger.ts
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const logger_1 = __importDefault(require("../utils/logger")); // Import logger
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -18,7 +17,6 @@ const options = {
         },
         servers: [
             { url: 'http://localhost:5000', description: 'Development server' },
-            { url: 'https://taskforce-challenge.onrender.com', description: 'Render server' }, // Add your Render URL here
         ],
         components: {
             securitySchemes: {
@@ -39,8 +37,6 @@ const options = {
 };
 const specs = (0, swagger_jsdoc_1.default)(options);
 const setupSwagger = (app) => {
-    logger_1.default.info('Setting up Swagger documentation'); // Add log
     app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(specs));
-    logger_1.default.info('Swagger documentation setup complete'); // Add log
 };
 exports.setupSwagger = setupSwagger;

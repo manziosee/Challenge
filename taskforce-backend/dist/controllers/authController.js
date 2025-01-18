@@ -12,15 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isTokenRevoked = exports.logout = exports.changePassword = exports.login = exports.register = void 0;
+exports.logout = exports.updateProfile = exports.changePassword = exports.login = exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const email_1 = require("../utils/email");
-const logger_1 = __importDefault(require("../utils/logger"));
-const utils_1 = require("../utils");
-// In-memory token blacklist
-const revokedTokens = new Set();
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password } = req.body;
     try {
@@ -75,32 +71,14 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
+// Placeholder for updateProfile function
+const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // Add your implementation for updating user profile
+});
+exports.updateProfile = updateProfile;
+// Placeholder for logout function
 const logout = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
-    if (!token) {
-        return res.status(400).json({ error: 'No token provided' });
-    }
-    try {
-        // Add the token to the in-memory blacklist
-        revokedTokens.add(token);
-        logger_1.default.info(`User logged out. Token revoked: ${token}`);
-        res.status(200).json({ message: 'Logged out successfully' });
-    }
-    catch (error) {
-        logger_1.default.error(`Error during logout: ${error}`);
-        utils_1.ErrorHandler.handle(new utils_1.HttpError(500, 'Error during logout', 'InternalServerError'), res);
-    }
+    // Add your implementation for logging out the user
+    // For example, you might want to invalidate the JWT token
 });
 exports.logout = logout;
-// Middleware to check if a token is revoked
-const isTokenRevoked = (req, res, next) => {
-    var _a;
-    const token = (_a = req.header('Authorization')) === null || _a === void 0 ? void 0 : _a.replace('Bearer ', '');
-    if (token && revokedTokens.has(token)) {
-        utils_1.ErrorHandler.handle(new utils_1.HttpError(401, 'Token revoked', 'UnauthenticatedError'), res);
-        return;
-    }
-    next();
-};
-exports.isTokenRevoked = isTokenRevoked;
