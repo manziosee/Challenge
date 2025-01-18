@@ -4,8 +4,9 @@ import { Suspense, lazy } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ThemeToggle } from './components/ThemeToggle';
 import { CurrencyProvider } from './context/CurrencyContext';
-import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
+import { AuthProvider } from './context/AuthContext';
 import { useTheme } from './hooks/useTheme';
+import { ProtectedRoute } from './components/ProtectedRoute'; // Import ProtectedRoute
 
 const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
@@ -21,37 +22,42 @@ export default function App() {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <AuthProvider> {/* Wrap the application with AuthProvider */}
+      <AuthProvider>
         <CurrencyProvider>
           <Router>
             <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
               <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+
+                  {/* Protected routes */}
                   <Route
                     path="/*"
                     element={
-                      <div className="flex h-screen">
-                        <div className="flex-shrink-0">
-                          <Sidebar />
+                      <ProtectedRoute>
+                        <div className="flex h-screen">
+                          <div className="flex-shrink-0">
+                            <Sidebar />
+                          </div>
+                          <div className="flex-1 flex flex-col overflow-hidden">
+                            <header className="h-16 flex items-center justify-end px-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                              <ThemeToggle />
+                            </header>
+                            <main className="flex-1 overflow-auto">
+                              <Routes>
+                                <Route path="/" element={<Dashboard />} />
+                                <Route path="/transactions" element={<Transactions />} />
+                                <Route path="/reports" element={<Reports />} />
+                                <Route path="/budgets" element={<Budgets />} />
+                                <Route path="/categories" element={<Categories />} />
+                                <Route path="/settings" element={<Settings />} />
+                              </Routes>
+                            </main>
+                          </div>
                         </div>
-                        <div className="flex-1 flex flex-col overflow-hidden">
-                          <header className="h-16 flex items-center justify-end px-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                            <ThemeToggle />
-                          </header>
-                          <main className="flex-1 overflow-auto">
-                            <Routes>
-                              <Route path="/" element={<Dashboard />} />
-                              <Route path="/transactions" element={<Transactions />} />
-                              <Route path="/reports" element={<Reports />} />
-                              <Route path="/budgets" element={<Budgets />} />
-                              <Route path="/categories" element={<Categories />} />
-                              <Route path="/settings" element={<Settings />} />
-                            </Routes>
-                          </main>
-                        </div>
-                      </div>
+                      </ProtectedRoute>
                     }
                   />
                 </Routes>
@@ -60,7 +66,7 @@ export default function App() {
             </div>
           </Router>
         </CurrencyProvider>
-      </AuthProvider> {/* Close AuthProvider */}
+      </AuthProvider>
     </div>
   );
 }
