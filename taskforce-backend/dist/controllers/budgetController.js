@@ -12,11 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkBudget = exports.updateBudget = exports.addBudget = exports.getBudgets = void 0;
+exports.updateBudget = exports.addBudget = exports.getBudgets = exports.checkBudget = void 0;
 const Budget_1 = __importDefault(require("../models/Budget"));
+const User_1 = __importDefault(require("../models/User"));
+const emails_service_1 = __importDefault(require("../service/emails.service"));
 const error_handler_1 = require("../utils/http/error-handler");
-const notifications_1 = require("../utils/notifications");
 const logger_1 = __importDefault(require("../utils/logger"));
+const checkBudget = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const budgets = yield Budget_1.default.find({ userId });
+        const user = yield User_1.default.findById(userId);
+        for (const budget of budgets) {
+            if (budget.spent > budget.limit) {
+                const message = `Budget exceeded for ${budget.category}. Limit: ${budget.limit}, Spent: ${budget.spent}`;
+                if (user) {
+                    yield emails_service_1.default.sendBudgetNotification(user.email, message);
+                }
+            }
+        }
+    }
+    catch (error) {
+        logger_1.default.error(`Error checking budgets: ${error}`);
+    }
+});
+exports.checkBudget = checkBudget;
 const getBudgets = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     try {
@@ -61,18 +80,3 @@ const updateBudget = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.updateBudget = updateBudget;
-const checkBudget = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const budgets = yield Budget_1.default.find({ userId });
-        for (const budget of budgets) {
-            if (budget.spent > budget.limit) {
-                const message = `Budget exceeded for ${budget.category}. Limit: ${budget.limit}, Spent: ${budget.spent}`;
-                yield (0, notifications_1.sendBudgetNotification)(userId, message);
-            }
-        }
-    }
-    catch (error) {
-        logger_1.default.error(`Error checking budgets: ${error}`);
-    }
-});
-exports.checkBudget = checkBudget;

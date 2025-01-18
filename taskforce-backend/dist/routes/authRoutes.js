@@ -118,4 +118,28 @@ router.put('/change-password', authMiddleware_1.authMiddleware, (req, res) => __
         error_handler_1.ErrorHandler.handle(error, res);
     }
 }));
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *       400:
+ *         description: No token provided
+ *       500:
+ *         description: Error during logout
+ */
+router.post('/logout', authMiddleware_1.authMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        yield (0, authController_1.logout)(req, res);
+    }
+    catch (error) {
+        error_handler_1.ErrorHandler.handle(error, res);
+    }
+}));
 exports.default = router;
