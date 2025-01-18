@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, changePassword } from '../controllers/authController';
+import { register, login, changePassword, logout } from '../controllers/authController';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { ErrorHandler } from '../utils/http/error-handler';
 
@@ -101,6 +101,30 @@ router.post('/login', async (req, res) => {
 router.put('/change-password', authMiddleware, async (req, res) => {
   try {
     await changePassword(req, res);
+  } catch (error) {
+    ErrorHandler.handle(error as Error, res);
+  }
+});
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout a user
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *       400:
+ *         description: No token provided
+ *       500:
+ *         description: Error during logout
+ */
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    await logout(req, res);
   } catch (error) {
     ErrorHandler.handle(error as Error, res);
   }

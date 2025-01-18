@@ -14,15 +14,13 @@ type EmailOptions = {
 class EmailService {
   private resend: Resend;
   private email_from: string;
+
   constructor(api_key: string, from_email: string) {
     this.resend = new Resend(api_key);
     this.email_from = from_email;
   }
 
-  async sendEmail(
-    data: EmailOptions,
-    Template: ReactNode
-  ): Promise<CreateEmailResponse> {
+  async sendOTP(data: EmailOptions, Template: ReactNode): Promise<CreateEmailResponse> {
     try {
       return this.resend.emails.send({
         from: this.email_from,
@@ -32,6 +30,20 @@ class EmailService {
       });
     } catch (error) {
       logger.error("Error sending email with Resend:", error);
+      throw error;
+    }
+  }
+
+  async sendBudgetNotification(email: string, message: string): Promise<void> {
+    try {
+      await this.resend.emails.send({
+        from: this.email_from,
+        to: email,
+        subject: 'Budget Exceeded Notification',
+        html: `<p>${message}</p>`,
+      });
+    } catch (error) {
+      logger.error("Error sending budget notification email:", error);
       throw error;
     }
   }

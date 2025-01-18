@@ -1,8 +1,27 @@
 import { Request, Response } from 'express';
 import Budget from '../models/Budget';
+import User from '../models/User';
+import EmailService from '../service/emails.service';
 import { HttpError, ErrorHandler } from '../utils/http/error-handler';
-import { sendBudgetNotification } from '../utils/notifications';
 import logger from '../utils/logger';
+
+export const checkBudget = async (userId: string) => {
+  try {
+    const budgets = await Budget.find({ userId });
+    const user = await User.findById(userId);
+
+    for (const budget of budgets) {
+      if (budget.spent > budget.limit) {
+        const message = `Budget exceeded for ${budget.category}. Limit: ${budget.limit}, Spent: ${budget.spent}`;
+        if (user) {
+          await EmailService.sendBudgetNotification(user.email, message);
+        }
+      }
+    }
+  } catch (error) {
+    logger.error(`Error checking budgets: ${error}`);
+  }
+};
 
 export const getBudgets = async (req: Request, res: Response) => {
   const { userId } = req.params;
@@ -45,19 +64,5 @@ export const updateBudget = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error(`Error updating budget: ${error}`);
     ErrorHandler.handle(new HttpError(500, 'Error updating budget', 'InternalServerError'), res);
-  }
-};
-
-export const checkBudget = async (userId: string) => {
-  try {
-    const budgets = await Budget.find({ userId });
-    for (const budget of budgets) {
-      if (budget.spent > budget.limit) {
-        const message = `Budget exceeded for ${budget.category}. Limit: ${budget.limit}, Spent: ${budget.spent}`;
-        await sendBudgetNotification(userId, message);
-      }
-    }
-  } catch (error) {
-    logger.error(`Error checking budgets: ${error}`);
   }
 };

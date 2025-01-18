@@ -1,8 +1,14 @@
-import { Request, Response } from 'express';
+// src/controllers/authController.ts
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { sendEmail } from '../utils/email';
+import logger from '../utils/logger';
+import { ErrorHandler, HttpError } from '../utils';
+
+// In-memory token blacklist
+const revokedTokens = new Set<string>();
 
 export const register = async (req: Request, res: Response): Promise<Response | void> => {
   const { name, email, password } = req.body;
@@ -59,13 +65,29 @@ export const changePassword = async (req: Request, res: Response): Promise<Respo
   }
 };
 
-// Placeholder for updateProfile function
-export const updateProfile = async (req: Request, res: Response): Promise<Response | void> => {
-  // Add your implementation for updating user profile
+export const logout = async (req: Request, res: Response): Promise<Response | void> => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(400).json({ error: 'No token provided' });
+  }
+
+  try {
+    // Add the token to the in-memory blacklist
+    revokedTokens.add(token);
+    logger.info(`User logged out. Token revoked: ${token}`);
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    logger.error(`Error during logout: ${error}`);
+    ErrorHandler.handle(new HttpError(500, 'Error during logout', 'InternalServerError'), res);
+  }
 };
 
-// Placeholder for logout function
-export const logout = async (req: Request, res: Response): Promise<Response | void> => {
-  // Add your implementation for logging out the user
-  // For example, you might want to invalidate the JWT token
+// Middleware to check if a token is revoked
+export const isTokenRevoked = (req: Request, res: Response, next: NextFunction): void => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (token && revokedTokens.has(token)) {
+    ErrorHandler.handle(new HttpError(401, 'Token revoked', 'UnauthenticatedError'), res);
+    return;
+  }
+  next();
 };
